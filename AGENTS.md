@@ -10,7 +10,7 @@ Single-page tool that lists the menu for a scout summer camp ("vacanze di branco
 
 - Group: **24 children (8-12 years) + 8 adults = 32 people**.
 - Doses are computed on **30 equivalent portions**: a child counts as **0.9** of an adult portion (`24 × 0.9 + 8 = 29.6 ≈ 30`). Earlier the child ratio was 0.75 (26 equivalent portions); it was raised to 0.9 on user request. Changing the ratio scales all mass/volume/count doses proportionally.
-- Doses given in the original source were kept only when coherent with the group; they scale with the equivalent-portion base too, for consistency.
+- Pre-set doses are kept only when coherent with the group and scale with the equivalent-portion base for consistency.
 
 ## Data Model (in `index.html`)
 
@@ -31,12 +31,12 @@ Shopping-list label per key comes from the first ingredient seen with that `k`, 
 
 ## Editorial Decisions Baked Into the Data
 
-- `Insalata di riso`: original doses were a single/family portion (riso 250gr), not for the group. Recomputed for the full group.
-- `Frittata di zucchine`: eggs were missing from the original source; added (~21) with a note.
-- Olio EVO and Sale were added to every savory dish that needs them (values are indicative, q.b.).
-- Units for `Carote` were normalized to `gr` (one dish had `pz`) so the shopping list sums cleanly.
-- The original source has **no Venerdì** (jumps Giovedì → Sabato); kept as-is, flagged with a `note` on the Sabato day.
-- Dishes with no ingredients in the original source (`Panini`, `Verdure grigliate`, `Frutta`) carry estimated quantities with a "non specificato" note.
+- `Insalata di riso`: doses are sized for the full group; a single/family portion (riso 250gr) would be far too little.
+- `Frittata di zucchine`: eggs are included (~21) with a note, since a frittata needs them.
+- Olio EVO and Sale are added to every savory dish that needs them (values are indicative, q.b.).
+- Units for `Carote` are all `gr` so the shopping list sums cleanly.
+- There is **no Venerdì** (days jump Giovedì → Sabato); flagged with a `note` on the Sabato day.
+- `Panini`, `Verdure grigliate`, and `Frutta` have no explicit ingredient breakdown; they carry estimated quantities with a "non specificato" note.
 
 ## Editing Doses
 
