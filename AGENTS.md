@@ -55,7 +55,7 @@ node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');con
 
 ## Deploy
 
-Served by GitHub Pages from the `main` branch, root path. `index.html` at the repo root is the published page: https://lussoluca.github.io/menu_dvb_2026/
+Served by GitHub Pages from the `main` branch, root path. `index.html` at the repo root is the published page: https://lussoluca.github.io/menu_vdb_2026/
 
 ```bash
 git add index.html
