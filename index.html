@@ -47,7 +47,13 @@
   button{background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:8px;
          cursor:pointer;font-size:.9rem}
   @media(max-width:560px){.ing{grid-template-columns:1fr 90px 46px}}
-  @media print{header{color:#000;background:#fff}input{border:none}button{display:none}}
+  @media print{
+    header,#menu,.controls{display:none}
+    main{max-width:none;padding:0;margin:0}
+    #shop{margin-top:0}
+    #shop h2{border-bottom:2px solid #000}
+    table{border:none}
+  }
 </style>
 </head>
 <body>
