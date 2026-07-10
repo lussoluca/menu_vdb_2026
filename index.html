@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu Vacanze di Branco — Dosi & Lista spesa</title>
+<style>
+  :root{
+    --bg:#f6f7f4; --card:#fff; --ink:#26311f; --muted:#6b7563;
+    --accent:#3f7a34; --accent2:#e7f0e2; --border:#d9ddd2; --flag:#b5651d; --flagbg:#fdf1e3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.4}
+  header{background:var(--accent);color:#fff;padding:22px 20px}
+  header h1{margin:0 0 4px;font-size:1.5rem}
+  header p{margin:2px 0;font-size:.9rem;opacity:.95}
+  main{max-width:1050px;margin:0 auto;padding:16px 14px 60px}
+  .day{margin:26px 0 8px;font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:4px}
+  .meal{margin:16px 0 6px;font-weight:700;color:var(--accent);font-size:1.05rem;text-transform:capitalize}
+  .dish{background:var(--card);border:1px solid var(--border);border-radius:10px;
+        padding:12px 14px;margin:10px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .dish h3{margin:0 0 8px;font-size:1.05rem}
+  .ing{display:grid;grid-template-columns:1fr 110px 60px;gap:8px;align-items:center;
+       padding:4px 0;border-top:1px dashed var(--border)}
+  .ing:first-of-type{border-top:none}
+  .ing label{font-size:.95rem}
+  .ing input{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;
+             text-align:right;font-size:.95rem;background:#fcfdfb}
+  .ing input:focus{outline:2px solid var(--accent)}
+  .unit{color:var(--muted);font-size:.85rem}
+  .ready{grid-column:2/4;color:var(--muted);font-style:italic;font-size:.85rem;text-align:right}
+  .note{font-size:.8rem;color:var(--muted);margin-top:6px}
+  .flag{background:var(--flagbg);border-left:4px solid var(--flag)}
+  .flag .badge{display:inline-block;background:var(--flag);color:#fff;font-size:.7rem;
+               padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+  #shop{margin-top:36px}
+  #shop h2{border-bottom:3px solid var(--accent);padding-bottom:6px}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);
+        border-radius:10px;overflow:hidden}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:.92rem}
+  th{background:var(--accent2);color:var(--accent);position:sticky;top:0}
+  td.qty{text-align:right;font-weight:700;white-space:nowrap}
+  td.used{color:var(--muted);font-size:.82rem}
+  tr:last-child td{border-bottom:none}
+  .controls{margin:8px 0 0;font-size:.85rem;color:var(--muted)}
+  button{background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:8px;
+         cursor:pointer;font-size:.9rem}
+  @media(max-width:560px){.ing{grid-template-columns:1fr 90px 46px}}
+  @media print{header{color:#000;background:#fff}input{border:none}button{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐺 Menu Vacanze di Branco — Dosi & Lista spesa</h1>
+  <p>32 persone: 24 bimbi (8-12 anni) + 8 adulti</p>
+  <p>Dosi calcolate su <strong>26 porzioni equivalenti</strong> (bimbo attivo ≈ 0,75 porzione adulto). Modifica i campi: la lista spesa si aggiorna da sola.</p>
+</header>
+<main>
+  <div id="menu"></div>
+
+  <section id="shop">
+    <h2>🛒 Lista della spesa</h2>
+    <p class="controls">Somma automatica per ingrediente (uguali sommati tra piatti). Esclude i "Già pronto".</p>
+    <table>
+      <thead><tr><th>Ingrediente</th><th style="text-align:right">Totale</th><th>Usato in</th></tr></thead>
+      <tbody id="shopBody"></tbody>
+    </table>
+    <p class="controls"><button onclick="window.print()">🖨️ Stampa</button></p>
+  </section>
+</main>
+
+<script>
+// ---- DATI ----
+// i = ingrediente: {n:nome, k:chiave-merge, v:valore, u:unità, note?, flag?, ready?}
+// unità: gr, kg, ml, lt, pz  → normalizzate per la somma
+const MENU = [
+ {day:"Lunedì", meals:[
+   {meal:"Pranzo", dishes:[
+     {name:"Insalata di riso", flag:"dosi originali = porzione singola, ricalcolate per il gruppo",
+      ings:[{n:"Riso",k:"riso",v:2000,u:"gr"},{n:"Wurstel",k:"wurstel",v:800,u:"gr"},
+            {n:"Formaggio",k:"formaggio",v:700,u:"gr"},{n:"Carote",k:"carote",v:600,u:"gr"},
+            {n:"Mais",k:"mais",v:1000,u:"gr",note:"≈3 barattoli"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:20,u:"gr"}]},
+     {name:"Melone", ings:[{n:"Melone",k:"melone",v:4,u:"pz"}]}
+   ]},
+   {meal:"Cena", dishes:[
+     {name:"Lasagne al ragù",
+      ings:[{n:"Besciamella",k:"besciamella",v:3,u:"lt"},{n:"Formaggio",k:"formaggio",v:500,u:"gr"},
+            {n:"Lasagne fresche",k:"lasagne",v:2.5,u:"kg"},{n:"Ragù",k:"ragu",ready:true},
+            {n:"Sale",k:"sale",v:20,u:"gr"}]},
+     {name:"Carote al burro",
+      ings:[{n:"Carote",k:"carote",v:2500,u:"gr"},{n:"Burro",k:"burro",v:250,u:"gr"},
+            {n:"Sale",k:"sale",v:15,u:"gr"}]},
+     {name:"Frutta",
+      ings:[{n:"Frutta assortita",k:"frutta",v:4000,u:"gr",note:"stima ~150g/persona"}]}
+   ]}
+ ]},
+ {day:"Martedì", meals:[
+   {meal:"Pranzo", dishes:[
+     {name:"Pasta al pesto",
+      ings:[{n:"Pasta",k:"pasta",v:3,u:"kg"},{n:"Pesto",k:"pesto",ready:true},
+            {n:"Sale",k:"sale",v:30,u:"gr"}]},
+     {name:"Caprese",
+      ings:[{n:"Pomodori",k:"pomodori",v:4000,u:"gr"},{n:"Mozzarella",k:"mozzarella",v:2000,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:15,u:"gr"}]}
+   ]},
+   {meal:"Cena", dishes:[
+     {name:"Frittata di zucchine", note:"aggiungere ~18 uova (non in elenco originale)",
+      ings:[{n:"Zucchine",k:"zucchine",v:2500,u:"gr"},{n:"Ricotta",k:"ricotta",v:1000,u:"gr"},
+            {n:"Formaggio",k:"formaggio",v:500,u:"gr"},{n:"Uova",k:"uova",v:18,u:"pz"},
+            {n:"Olio EVO",k:"olio",v:60,u:"ml"},{n:"Sale",k:"sale",v:15,u:"gr"}]},
+     {name:"Torta salata alle zucchine",
+      ings:[{n:"Zucchine",k:"zucchine",v:1500,u:"gr"},{n:"Farina (base)",k:"farina",v:500,u:"gr"},
+            {n:"Olio (base)",k:"olio",v:60,u:"ml"},{n:"Vino bianco (base)",k:"vino",v:100,u:"ml"},
+            {n:"Sale",k:"sale",v:15,u:"gr"}]},
+     {name:"Torta salata porri e speck",
+      ings:[{n:"Porri",k:"porri",v:800,u:"gr"},{n:"Speck a dadini",k:"speck",v:400,u:"gr"},
+            {n:"Farina (base)",k:"farina",v:500,u:"gr"},{n:"Olio (base)",k:"olio",v:60,u:"ml"},
+            {n:"Vino bianco (base)",k:"vino",v:100,u:"ml"},{n:"Sale",k:"sale",v:15,u:"gr"}]},
+     {name:"Purè",
+      ings:[{n:"Patate",k:"patate",v:4000,u:"gr"},{n:"Latte",k:"latte",v:800,u:"ml"},
+            {n:"Burro",k:"burro",v:250,u:"gr"},{n:"Parmigiano",k:"parmigiano",v:400,u:"gr"},
+            {n:"Sale",k:"sale",v:20,u:"gr"}]},
+     {name:"Budino (in busta)",
+      ings:[{n:"Preparato in busta",k:"prep-budino",v:7,u:"pz"},{n:"Latte",k:"latte",v:3500,u:"ml"}]}
+   ]}
+ ]},
+ {day:"Mercoledì", meals:[
+   {meal:"Pranzo", dishes:[
+     {name:"Panini", note:"non specificato: stima 2 panini/persona + affettati",
+      ings:[{n:"Panini",k:"panini",v:64,u:"pz"},{n:"Affettati misti",k:"affettati",v:2000,u:"gr"}]}
+   ]},
+   {meal:"Cena", dishes:[
+     {name:"Grigliata",
+      ings:[{n:"Salsiccia",k:"salsiccia",v:3000,u:"gr"},{n:"Wurstel",k:"wurstel",v:2000,u:"gr"},
+            {n:"Hamburger",k:"hamburger",v:40,u:"pz"},{n:"Sale",k:"sale",v:15,u:"gr"}]},
+     {name:"Bruschette al pomodoro",
+      ings:[{n:"Pane",k:"pane",v:1500,u:"gr"},{n:"Pomodoro",k:"pomodori",v:1500,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:10,u:"gr"}]},
+     {name:"Verdure grigliate", note:"non specificato: zucchine/melanzane/peperoni misti",
+      ings:[{n:"Verdure miste da griglia",k:"verdure-griglia",v:4000,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:15,u:"gr"}]}
+   ]}
+ ]},
+ {day:"Giovedì", meals:[
+   {meal:"Pranzo", dishes:[
+     {name:"Pasta al ragù di verdure",
+      ings:[{n:"Pasta",k:"pasta",v:3,u:"kg"},{n:"Ragù di verdure",k:"ragu-verdure",ready:true},
+            {n:"Sale",k:"sale",v:30,u:"gr"}]},
+     {name:"Insalata", ings:[{n:"Insalata",k:"insalata",v:1500,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:10,u:"gr"}]},
+     {name:"Carote", ings:[{n:"Carote",k:"carote",v:1500,u:"gr"}]},
+     {name:"Formaggio", ings:[{n:"Formaggio",k:"formaggio",v:1000,u:"gr"}]},
+     {name:"Tonno", ings:[{n:"Tonno",k:"tonno",v:800,u:"gr",note:"≈10 scatolette"}]}
+   ]},
+   {meal:"Cena", dishes:[
+     {name:"Passato di verdura con crostini",
+      ings:[{n:"Patate",k:"patate",v:1500,u:"gr"},{n:"Porri",k:"porri",v:600,u:"gr"},
+            {n:"Carote",k:"carote",v:800,u:"gr"},{n:"Piselli",k:"piselli",v:800,u:"gr"},
+            {n:"Pane (crostini)",k:"pane",v:800,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:60,u:"ml"},{n:"Sale",k:"sale",v:20,u:"gr"}]},
+     {name:"Bastoncini di pesce",
+      ings:[{n:"Bastoncini di pesce",k:"bastoncini",v:3000,u:"gr",note:"≈100 pezzi"},
+            {n:"Sale",k:"sale",v:10,u:"gr"}]},
+     {name:"Patate fritte al forno",
+      ings:[{n:"Patate fritte al forno (surgelate)",k:"patate-fritte",v:5000,u:"gr"},
+            {n:"Sale",k:"sale",v:15,u:"gr"}]}
+   ]}
+ ]},
+ {day:"Sabato", note:"il file non contiene Venerdì", meals:[
+   {meal:"Pranzo", dishes:[
+     {name:"Pasta fredda",
+      ings:[{n:"Pasta",k:"pasta",v:3,u:"kg"},{n:"Prosciutto a dadini",k:"prosciutto",v:600,u:"gr"},
+            {n:"Pomodori",k:"pomodori",v:1500,u:"gr"},{n:"Olive nere",k:"olive",v:400,u:"gr"},
+            {n:"Formaggio",k:"formaggio",v:800,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:30,u:"gr"}]},
+     {name:"Polpettine di ceci",
+      ings:[{n:"Ceci in scatola",k:"ceci",v:2.5,u:"kg"},{n:"Uova",k:"uova",v:5,u:"pz"},
+            {n:"Parmigiano",k:"parmigiano",v:300,u:"gr"},{n:"Pangrattato",k:"pangrattato",v:500,u:"gr"},
+            {n:"Provola",k:"provola",v:400,u:"gr"},{n:"Prezzemolo",k:"prezzemolo",v:1,u:"pz",note:"mazzo"},
+            {n:"Patate bollite",k:"patate",v:1500,u:"gr"},{n:"Zucchine cotte",k:"zucchine",v:800,u:"gr"},
+            {n:"Olio per frittura",k:"olio",v:500,u:"ml"},{n:"Sale",k:"sale",v:20,u:"gr"}]},
+     {name:"Ratatouille di carote, patate e piselli",
+      ings:[{n:"Carote",k:"carote",v:1000,u:"gr"},{n:"Patate",k:"patate",v:1500,u:"gr"},
+            {n:"Cipolla",k:"cipolla",v:500,u:"gr"},{n:"Piselli primavera",k:"piselli",v:1000,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:60,u:"ml"},{n:"Sale",k:"sale",v:20,u:"gr"}]}
+   ]},
+   {meal:"Cena", dishes:[
+     {name:"Pizza",
+      ings:[{n:"Farina",k:"farina",v:4,u:"kg"},{n:"Cubetti di lievito",k:"lievito",v:6,u:"pz"},
+            {n:"Polpa di pomodoro",k:"polpa-pomodoro",v:2000,u:"gr"},
+            {n:"Mozzarella",k:"mozzarella",v:1500,u:"gr"},{n:"Wurstel",k:"wurstel",v:200,u:"gr"},
+            {n:"Olio EVO",k:"olio",v:100,u:"ml"},{n:"Sale",k:"sale",v:40,u:"gr"}]}
+   ]}
+ ]}
+];
+
+// ---- UNITÀ ----
+// famiglia + fattore verso base (mass=gr, vol=ml, count=pz)
+const UNIT = {gr:{f:1,g:"mass"}, kg:{f:1000,g:"mass"}, ml:{f:1,g:"vol"}, lt:{f:1000,g:"vol"}, pz:{f:1,g:"count"}};
+
+function fmt(base, g){
+  if(g==="mass") return base>=1000 ? (base/1000).toFixed(2).replace(/\.?0+$/,"")+" kg" : Math.round(base)+" gr";
+  if(g==="vol")  return base>=1000 ? (base/1000).toFixed(2).replace(/\.?0+$/,"")+" lt" : Math.round(base)+" ml";
+  return (Math.round(base*100)/100)+" pz";
+}
+
+let idc=0;
+function render(){
+  const root=document.getElementById("menu");
+  MENU.forEach(d=>{
+    const day=document.createElement("div");
+    const h=document.createElement("h2");h.className="day";
+    h.textContent=d.day + (d.note ? "  ⚠️ "+d.note : "");
+    day.appendChild(h);
+    d.meals.forEach(m=>{
+      const mh=document.createElement("div");mh.className="meal";mh.textContent=m.meal;day.appendChild(mh);
+      m.dishes.forEach(dish=>{
+        const c=document.createElement("div");c.className="dish";
+        const t=document.createElement("h3");t.textContent=dish.name;
+        c.appendChild(t);
+        dish.ings.forEach(i=>{
+          const row=document.createElement("div");row.className="ing";
+          const lab=document.createElement("label");lab.textContent=i.n;row.appendChild(lab);
+          if(i.ready){
+            const r=document.createElement("div");r.className="ready";r.textContent="Già pronto, non servono dosi";
+            row.appendChild(r);
+          }else{
+            const inp=document.createElement("input");inp.type="number";inp.min="0";inp.step="any";
+            inp.value=i.v;inp.dataset.k=i.k;inp.dataset.u=i.u;inp.dataset.dish=dish.name;
+            inp.addEventListener("input",updateShop);
+            row.appendChild(inp);
+            const u=document.createElement("span");u.className="unit";u.textContent=i.u;row.appendChild(u);
+          }
+          c.appendChild(row);
+        });
+        if(dish.note){const n=document.createElement("div");n.className="note";n.textContent="ℹ️ "+dish.note;c.appendChild(n);}
+        const notes=dish.ings.filter(x=>x.note);
+        notes.forEach(x=>{const n=document.createElement("div");n.className="note";n.textContent="• "+x.n+": "+x.note;c.appendChild(n);});
+        day.appendChild(c);
+      });
+    });
+    root.appendChild(day);
+  });
+}
+
+// nome visualizzato per chiave (primo incontrato)
+const LABEL={};
+MENU.forEach(d=>d.meals.forEach(m=>m.dishes.forEach(dish=>dish.ings.forEach(i=>{
+  if(!i.ready && !LABEL[i.k]) LABEL[i.k]=i.n.replace(/\s*\(.*?\)/g,"");
+}))));
+
+function updateShop(){
+  const agg={}; // k -> {base, group, dishes:Set, mixed:bool}
+  document.querySelectorAll("#menu input").forEach(inp=>{
+    const k=inp.dataset.k, u=inp.dataset.u, v=parseFloat(inp.value)||0;
+    const un=UNIT[u]; if(!un) return;
+    if(!agg[k]) agg[k]={base:0,group:un.g,dishes:new Set(),mixed:false};
+    if(agg[k].group!==un.g) agg[k].mixed=true;
+    agg[k].base+=v*un.f;
+    agg[k].dishes.add(inp.dataset.dish);
+  });
+  const body=document.getElementById("shopBody");body.innerHTML="";
+  Object.keys(agg).sort((a,b)=>LABEL[a].localeCompare(LABEL[b],"it")).forEach(k=>{
+    const a=agg[k];
+    const tr=document.createElement("tr");
+    const td1=document.createElement("td");td1.textContent=LABEL[k];tr.appendChild(td1);
+    const td2=document.createElement("td");td2.className="qty";
+    td2.textContent=a.mixed?"— unità miste —":fmt(a.base,a.group);tr.appendChild(td2);
+    const td3=document.createElement("td");td3.className="used";
+    td3.textContent=[...a.dishes].join(", ");tr.appendChild(td3);
+    body.appendChild(tr);
+  });
+}
+
+render();
+updateShop();
+</script>
+</body>
+</html>
