@@ -90,6 +90,9 @@ const MENU = [
    ]}
  ]},
  {day:"Lunedì", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Biscotti",k:"biscotti",v:1800,u:"gr"}]}
+   ]},
    {meal:"Pranzo", dishes:[
      {name:"Insalata di riso", note:"usare riso parboiled: non scuoce anche in grandi quantità e resta sgranato",
       ings:[{n:"Riso",k:"riso",v:2300,u:"gr"},{n:"Wurstel",k:"wurstel",v:900,u:"gr"},
@@ -113,6 +116,9 @@ const MENU = [
    ]}
  ]},
  {day:"Martedì", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Pane",k:"pane",v:1800,u:"gr"},{n:"Marmellata",k:"marmellata",v:900,u:"gr"}]}
+   ]},
    {meal:"Pranzo", dishes:[
      {name:"Pasta al pesto",
       ings:[{n:"Pasta",k:"pasta",v:3.5,u:"kg"},{n:"Pesto",k:"pesto",ready:true},
@@ -145,6 +151,9 @@ const MENU = [
    ]}
  ]},
  {day:"Mercoledì", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Biscotti",k:"biscotti",v:1800,u:"gr"}]}
+   ]},
    {meal:"Pranzo", dishes:[
      {name:"Panini", note:"27 persone, ~2 panini/persona; affettati 60gr/panino, 1 fetta di formaggio/panino",
       ings:[{n:"Panini",k:"panini",v:54,u:"pz"},{n:"Affettati misti",k:"affettati",v:3240,u:"gr"},
@@ -165,6 +174,9 @@ const MENU = [
    ]}
  ]},
  {day:"Giovedì", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Pane",k:"pane",v:1800,u:"gr"},{n:"Marmellata",k:"marmellata",v:900,u:"gr"}]}
+   ]},
    {meal:"Pranzo", dishes:[
      {name:"Pasta al ragù di verdure",
       ings:[{n:"Pasta",k:"pasta",v:3.5,u:"kg"},{n:"Ragù di verdure",k:"ragu-verdure",ready:true},
@@ -191,7 +203,15 @@ const MENU = [
             {n:"Sale",k:"sale",v:20,u:"gr"}]}
    ]}
  ]},
- {day:"Sabato", note:"il file non contiene Venerdì", meals:[
+ {day:"Venerdì", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Biscotti",k:"biscotti",v:1800,u:"gr"}]}
+   ]}
+ ]},
+ {day:"Sabato", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Pane",k:"pane",v:1800,u:"gr"},{n:"Marmellata",k:"marmellata",v:900,u:"gr"}]}
+   ]},
    {meal:"Pranzo", dishes:[
      {name:"Pasta fredda",
       ings:[{n:"Pasta",k:"pasta",v:3.5,u:"kg"},{n:"Prosciutto a dadini",k:"prosciutto",v:700,u:"gr"},
@@ -215,6 +235,11 @@ const MENU = [
             {n:"Polpa di pomodoro",k:"polpa-pomodoro",v:2300,u:"gr"},
             {n:"Mozzarella",k:"mozzarella",v:1.75,u:"kg"},{n:"Wurstel",k:"wurstel",v:250,u:"gr"},
             {n:"Olio EVO",k:"olio",v:120,u:"ml"},{n:"Sale",k:"sale",v:45,u:"gr"}]}
+   ]}
+ ]},
+ {day:"Domenica", note:"giorno di partenza", meals:[
+   {meal:"Colazione", dishes:[
+     {name:"Colazione", ings:[{n:"Latte UHT",k:"latte",v:6,u:"lt"},{n:"Biscotti",k:"biscotti",v:1800,u:"gr"}]}
    ]}
  ]}
 ];
